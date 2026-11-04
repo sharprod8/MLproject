@@ -170,19 +170,19 @@ public class MoveToTargetAgent : Agent
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Target"))
+        /*if (other.CompareTag("Target"))
         {
             SetReward(1f);
             floor.material.color = winColour;
             EndEpisode();
-        }
+        }*/
 
-        /*else if (other.CompareTag("Wall"))
+        if (other.CompareTag("Wall"))
         {
             SetReward(-1f);
             floor.material.color = loseColour;
             EndEpisode();
-        }*/
+        }
     }
 
     private void Update()
@@ -199,7 +199,7 @@ public class MoveToTargetAgent : Agent
             return;
 
         AddReward(1f);
-
+        floor.material.color = winColour;
         EndEpisode();
     }
 }

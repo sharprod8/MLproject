@@ -8,11 +8,13 @@ public class ZoneScript : MonoBehaviour
 
         if (box != null)
         {
-            MoveToTargetAgent agent = FindObjectOfType<MoveToTargetAgent>();
+            MoveToTargetAgent agent = FindAnyObjectByType<MoveToTargetAgent>();
+            Debug.Log("box collided");
 
             if (agent != null)
             {
                 agent.BoxDelivered();
+                Debug.Log("delivered");
             }
         }
     }
