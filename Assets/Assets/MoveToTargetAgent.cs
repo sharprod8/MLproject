@@ -6,135 +6,211 @@ using UnityEngine.InputSystem;
 
 public class MoveToTargetAgent : Agent
 {
-    //[SerializeField] private Transform target;
-    [SerializeField] private float moveSpeed = 3f;
-    [SerializeField] private Renderer floor;
-    [SerializeField] private Color winColour = Color.green;
-    [SerializeField] private Color loseColour = Color.red;
-    [SerializeField] private Color idleColour = Color.grey;
-    [SerializeField] private Box box;
-    [SerializeField] private Transform zone;
-    private Vector3 boxStartPosition;
+    [Header("Team")]
+    [SerializeField] public TeamColour team;
 
-    private bool carryingBox;
+    [Header("Zones")]
+    [SerializeField] private ZoneScript homeZone;
+    [SerializeField] private ZoneScript enemyZone;
+
+    [Header("rend")]
+    [SerializeField] private Renderer agentRenderer;
+
+    [Header("speed")]
+    [SerializeField] private float moveSpeed = 4f;
+
+    [SerializeField] private BoxSpawner boxSpawner;
+    private Box carriedBox;
 
     private void Start()
     {
-        boxStartPosition = box.transform.localPosition;
+        switch (team)
+        {
+            case TeamColour.Red:
+                agentRenderer.material.color = Color.red;
+                break;
+
+            case TeamColour.Blue:
+                agentRenderer.material.color = Color.blue;
+                break;
+        }
     }
 
     public override void OnEpisodeBegin()
     {
-        carryingBox = false;
-        box.IsCarried = false;
+        carriedBox = null;
 
-        transform.localPosition = new Vector3(
-            Random.Range(-4f, 4f),
-            0.5f,
-            Random.Range(-4f, 4f));
+        transform.position = homeZone.transform.position + new Vector3(Random.Range(-1f, 1f), 0.5f, Random.Range(-1f, 1f));
 
-        box.transform.localPosition = new Vector3(
-            Random.Range(-4f, 4f),
-            0.5f,
-            Random.Range(-4f, 4f));
+        if (team == TeamColour.Red)
+        {
+            boxSpawner.ResetBoxes();
+        }
     }
 
     public override void CollectObservations(VectorSensor sensor)
     {
         sensor.AddObservation(transform.localPosition);
-        sensor.AddObservation(box.transform.localPosition);
-        sensor.AddObservation(zone.localPosition);
+        Box nearestBox = GetNearestBox();
 
-        if (carryingBox)
+        if (nearestBox != null)
         {
-            sensor.AddObservation((float)1f);
+            sensor.AddObservation(nearestBox.transform.localPosition);
+            sensor.AddObservation((int)nearestBox.Owner);
         }
         else
         {
-            sensor.AddObservation((float)0f);
+            sensor.AddObservation(Vector3.zero);
+            sensor.AddObservation(0);
         }
+
+        sensor.AddObservation(homeZone.transform.localPosition);
+        sensor.AddObservation(enemyZone.transform.localPosition);
+        sensor.AddObservation(carriedBox != null ? 1f : 0f);
     }
 
     public override void OnActionReceived(ActionBuffers actions)
     {
         float moveX = actions.ContinuousActions[0];
         float moveZ = actions.ContinuousActions[1];
-        float pickupAction = actions.ContinuousActions[2];
-        Vector3 move = new Vector3(moveX, 0f, moveZ);
-        transform.localPosition += move * moveSpeed * Time.deltaTime;
-        // Small penalty every step so it learns to hurry
-        if (MaxStep > 0) AddReward(-1f / MaxStep);
+        float grab = actions.ContinuousActions[2];
 
-        if (!carryingBox)
+        transform.position += new Vector3(moveX, 0f, moveZ) * moveSpeed * Time.deltaTime;
+
+        AddReward(-0.0005f);
+
+        AddReward(GetOwnedBoxCount() * 0.0002f);
+
+        if (carriedBox == null)
         {
-            float distanceToBox =
-                Vector3.Distance(transform.position, box.transform.position);
+            TryPickup(grab);
+        }
 
-            if (distanceToBox < 1f && pickupAction > 0.5f)
-            {
-                carryingBox = true;
-                box.IsCarried = true;
-
-                AddReward(0.1f);
-            }
+        if (carriedBox != null)
+        {
+            carriedBox.transform.position = transform.position + new Vector3(0f, 0.5f, 1f);
         }
     }
 
-    /*public override void Heuristic(in ActionBuffers actionsOut)
+    private void TryPickup(float grabValue)
     {
-        var continuous = actionsOut.ContinuousActions;
-        var kb = Keyboard.current;
-
-        if (kb == null) 
+        if (grabValue < 0.5f)
             return;
 
-        if (kb.dKey.isPressed)
+        Box nearestBox = GetNearestBox();
+
+        if (nearestBox == null)
+            return;
+
+        if (nearestBox.IsCarried)
+            return;
+
+        float distance = Vector3.Distance(transform.position, nearestBox.transform.position);
+
+        if (distance < 1f)
         {
-            if (kb.aKey.isPressed)
-            {
-                continuous[0] = ((float)1f) - ((float)1f);
-            }
-            else
-            {
-                continuous[0] = ((float)1f) - ((float)0f);
-            }
+            carriedBox = nearestBox;
+            carriedBox.IsCarried = true;
+
+            AddReward(0.2f);
         }
-        else
+    }
+
+    public void TryDeliverBox(ZoneScript zone)
+    {
+        if (carriedBox == null)
+            return;
+
+        //eweqew
+        if (zone.Team != team)
+            return;
+
+        TeamColour previousOwner =
+            carriedBox.Owner;
+
+        carriedBox.SetOwner(team);
+
+        if (previousOwner == TeamColour.None)
         {
-            if (kb.aKey.isPressed)
-            {
-                continuous[0] = ((float)0f) - ((float)1f);
-            }
-            else
-            {
-                continuous[0] = ((float)0f) - ((float)0f);
-            }
+            AddReward(1f);
         }
-        if (kb.wKey.isPressed)
+        else if (previousOwner != team)
         {
-            if (kb.sKey.isPressed)
-            {
-                continuous[1] = ((float)1f) - ((float)1f);
-            }
-            else
-            {
-                continuous[1] = ((float)1f) - ((float)0f);
-            }
+            AddReward(2f);
         }
-        else
+
+        carriedBox.IsCarried = false;
+
+        carriedBox.transform.position =
+            zone.transform.position +
+            new Vector3(
+                Random.Range(-0.3f, 0.3f),
+                0.5f,
+                Random.Range(-0.3f, 0.3f));
+
+        carriedBox = null;
+    }
+
+    /*public void BoxDelivered()
+    {
+        if (carriedBox == null)
+            return;
+
+        TeamColour previousOwner = carriedBox.Owner;
+
+        carriedBox.SetOwner(team);
+
+        if (previousOwner != team)
         {
-            if (kb.sKey.isPressed)
-            {
-                continuous[1] = ((float)0f) - ((float)1f);
-            }
-            else
-            {
-                continuous[1] = ((float)0f) - ((float)0f);
-            }
+            AddReward(1f);
         }
+
+        carriedBox.IsCarried = false;
+        carriedBox = null;
     }*/
 
-    public override void Heuristic(in ActionBuffers actionsOut)
+    private Box GetNearestBox()
+    {
+        Box[] boxes = FindObjectsByType<Box>(FindObjectsSortMode.None);
+        Box closest = null;
+        float closestDistance = Mathf.Infinity;
+
+        foreach (Box box in boxes)
+        {
+            if (box.IsCarried)
+                continue;
+
+            float distance = Vector3.Distance(transform.position, box.transform.position);
+
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                closest = box;
+            }
+        }
+
+        return closest;
+    }
+
+    private int GetOwnedBoxCount()
+    {
+        Box[] boxes = FindObjectsByType<Box>(FindObjectsSortMode.None);
+
+        int ownedBoxes = 0;
+
+        foreach (Box box in boxes)
+        {
+            if (box.Owner == team)
+            {
+                ownedBoxes++;
+            }
+        }
+
+        return ownedBoxes;
+    }
+
+    public override void Heuristic(
+        in ActionBuffers actionsOut)
     {
         var actions = actionsOut.ContinuousActions;
 
@@ -163,43 +239,12 @@ public class MoveToTargetAgent : Agent
             actions[2] = 1;
     }
 
-    public override void Initialize() // runs once at startup
-    {
-        floor.material.color = idleColour;
-    }
-
     private void OnTriggerEnter(Collider other)
     {
-        /*if (other.CompareTag("Target"))
-        {
-            SetReward(1f);
-            floor.material.color = winColour;
-            EndEpisode();
-        }*/
-
         if (other.CompareTag("Wall"))
         {
-            SetReward(-1f);
-            floor.material.color = loseColour;
+            AddReward(-1f);
             EndEpisode();
         }
-    }
-
-    private void Update()
-    {
-        if (carryingBox)
-        {
-            box.transform.position = transform.position + new Vector3(0f, 0.5f, 1f);
-        }
-    }
-
-    public void BoxDelivered()
-    {
-        if (!carryingBox)
-            return;
-
-        AddReward(1f);
-        floor.material.color = winColour;
-        EndEpisode();
     }
 }

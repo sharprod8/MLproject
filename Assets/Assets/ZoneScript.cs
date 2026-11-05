@@ -2,20 +2,29 @@ using UnityEngine;
 
 public class ZoneScript : MonoBehaviour
 {
+    public TeamColour Team;
+
+    private Renderer rend;
+
+    private void Start()
+    {
+        rend = GetComponent<Renderer>();
+
+        if (Team == TeamColour.Red)
+            rend.material.color = Color.red;
+
+        if (Team == TeamColour.Blue)
+            rend.material.color = Color.blue;
+    }
+
     private void OnTriggerEnter(Collider other)
     {
-        Box box = other.GetComponent<Box>();
+        MoveToTargetAgent agent =
+            other.GetComponent<MoveToTargetAgent>();
 
-        if (box != null)
-        {
-            MoveToTargetAgent agent = FindAnyObjectByType<MoveToTargetAgent>();
-            Debug.Log("box collided");
+        if (agent == null)
+            return;
 
-            if (agent != null)
-            {
-                agent.BoxDelivered();
-                Debug.Log("delivered");
-            }
-        }
+        agent.TryDeliverBox(this);
     }
 }
