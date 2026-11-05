@@ -981,7 +981,7 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 5000
+  MaxStep: 10000
   team: 1
   homeZone: {fileID: 1767625974}
   enemyZone: {fileID: 238711950}
@@ -2663,7 +2663,7 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 5000
+  MaxStep: 10000
   team: 2
   homeZone: {fileID: 238711950}
   enemyZone: {fileID: 1767625974}
@@ -3050,7 +3050,7 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 5000
+  MaxStep: 10000
   team: 1
   homeZone: {fileID: 89878620}
   enemyZone: {fileID: 1760312604}
@@ -3373,7 +3373,7 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 5000
+  MaxStep: 10000
   team: 1
   homeZone: {fileID: 1767625974}
   enemyZone: {fileID: 238711950}
@@ -3824,7 +3824,7 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 5000
+  MaxStep: 10000
   team: 2
   homeZone: {fileID: 1760312604}
   enemyZone: {fileID: 89878620}
@@ -4274,7 +4274,7 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 5000
+  MaxStep: 10000
   team: 2
   homeZone: {fileID: 1892232043}
   enemyZone: {fileID: 433180510}
@@ -5520,7 +5520,7 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 5000
+  MaxStep: 10000
   team: 2
   homeZone: {fileID: 238711950}
   enemyZone: {fileID: 1767625974}
@@ -5963,7 +5963,7 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 5000
+  MaxStep: 10000
   team: 1
   homeZone: {fileID: 433180510}
   enemyZone: {fileID: 1892232043}
@@ -6433,7 +6433,7 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 5000
+  MaxStep: 10000
   team: 1
   homeZone: {fileID: 89878620}
   enemyZone: {fileID: 1760312604}
@@ -7170,7 +7170,7 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 5000
+  MaxStep: 10000
   team: 1
   homeZone: {fileID: 433180510}
   enemyZone: {fileID: 1892232043}
@@ -7508,7 +7508,7 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 5000
+  MaxStep: 10000
   team: 2
   homeZone: {fileID: 1760312604}
   enemyZone: {fileID: 89878620}
@@ -7846,7 +7846,7 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 5000
+  MaxStep: 10000
   team: 2
   homeZone: {fileID: 1892232043}
   enemyZone: {fileID: 433180510}
