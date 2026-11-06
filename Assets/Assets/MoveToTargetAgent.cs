@@ -21,6 +21,9 @@ public class MoveToTargetAgent : Agent
 
     [SerializeField] private BoxSpawner boxSpawner;
     private Box carriedBox;
+    private int successfulPickups;
+    private int successfulDeliveries;
+    private float rewardTimer;
 
     private void Start()
     {
@@ -38,6 +41,8 @@ public class MoveToTargetAgent : Agent
 
     public override void OnEpisodeBegin()
     {
+        //Debug.Log($"{team} pickups: {successfulPickups}, deliveries: {successfulDeliveries}");
+
         carriedBox = null;
 
         transform.position = homeZone.transform.position + new Vector3(Random.Range(-1f, 1f), 0.5f, Random.Range(-1f, 1f));
@@ -51,12 +56,21 @@ public class MoveToTargetAgent : Agent
     public override void CollectObservations(VectorSensor sensor)
     {
         sensor.AddObservation(transform.localPosition);
-        Box nearestBox = GetNearestBox();
-
-        if (nearestBox != null)
+        
+        if (carriedBox == null)
         {
-            sensor.AddObservation(nearestBox.transform.localPosition);
-            sensor.AddObservation((int)nearestBox.Owner);
+            Box nearestBox = GetNearestBox();
+
+            if (nearestBox != null)
+            {
+                sensor.AddObservation(nearestBox.transform.localPosition);
+                sensor.AddObservation((int)nearestBox.Owner);
+            }
+            else
+            {
+                sensor.AddObservation(Vector3.zero);
+                sensor.AddObservation(0);
+            }
         }
         else
         {
@@ -64,6 +78,10 @@ public class MoveToTargetAgent : Agent
             sensor.AddObservation(0);
         }
 
+
+        Vector3 toHome = homeZone.transform.localPosition - transform.localPosition;
+
+        sensor.AddObservation(toHome);
         sensor.AddObservation(homeZone.transform.localPosition);
         sensor.AddObservation(enemyZone.transform.localPosition);
         sensor.AddObservation(carriedBox != null ? 1f : 0f);
@@ -75,11 +93,19 @@ public class MoveToTargetAgent : Agent
         float moveZ = actions.ContinuousActions[1];
         float grab = actions.ContinuousActions[2];
 
+        rewardTimer += Time.deltaTime;
+
+        if (rewardTimer > 1f)
+        {
+            rewardTimer = 0f;
+            AddReward(GetOwnedBoxCount() * 0.05f);
+        }
+
         transform.position += new Vector3(moveX, 0f, moveZ) * moveSpeed * Time.deltaTime;
 
         AddReward(-0.0005f);
 
-        AddReward(GetOwnedBoxCount() * 0.0002f);
+        AddReward(GetOwnedBoxCount() * 0.001f);
 
         if (carriedBox == null)
         {
@@ -113,6 +139,8 @@ public class MoveToTargetAgent : Agent
             carriedBox.IsCarried = true;
 
             AddReward(0.2f);
+
+            Debug.Log("Carried");
         }
     }
 
@@ -132,11 +160,11 @@ public class MoveToTargetAgent : Agent
 
         if (previousOwner == TeamColour.None)
         {
-            AddReward(1f);
+            AddReward(2f);
         }
         else if (previousOwner != team)
         {
-            AddReward(2f);
+            AddReward(3f);
         }
 
         carriedBox.IsCarried = false;
@@ -149,6 +177,8 @@ public class MoveToTargetAgent : Agent
                 Random.Range(-0.3f, 0.3f));
 
         carriedBox = null;
+
+        Debug.Log("Delivered");
     }
 
     /*public void BoxDelivered()
@@ -243,8 +273,19 @@ public class MoveToTargetAgent : Agent
     {
         if (other.CompareTag("Wall"))
         {
-            AddReward(-1f);
+            AddReward(-0.5f);
             EndEpisode();
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        Box nearest = GetNearestBox();
+
+        if (nearest != null)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawLine(transform.position, nearest.transform.position);
         }
     }
 }
