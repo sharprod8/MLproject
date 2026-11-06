@@ -8,6 +8,7 @@ public class MoveToTargetAgent : Agent
 {
     [Header("Team")]
     [SerializeField] public TeamColour team;
+    [SerializeField] private bool boxResetter;
 
     [Header("Zones")]
     [SerializeField] private ZoneScript homeZone;
@@ -24,6 +25,7 @@ public class MoveToTargetAgent : Agent
     private int successfulPickups;
     private int successfulDeliveries;
     private float rewardTimer;
+    
 
     private void Start()
     {
@@ -41,13 +43,11 @@ public class MoveToTargetAgent : Agent
 
     public override void OnEpisodeBegin()
     {
-        //Debug.Log($"{team} pickups: {successfulPickups}, deliveries: {successfulDeliveries}");
-
         carriedBox = null;
 
         transform.position = homeZone.transform.position + new Vector3(Random.Range(-1f, 1f), 0.5f, Random.Range(-1f, 1f));
 
-        if (team == TeamColour.Red)
+        if (boxResetter == true)
         {
             boxSpawner.ResetBoxes();
         }
@@ -63,7 +63,7 @@ public class MoveToTargetAgent : Agent
 
             if (nearestBox != null)
             {
-                sensor.AddObservation(nearestBox.transform.localPosition);
+                sensor.AddObservation(nearestBox.transform.localPosition - transform.localPosition);
                 sensor.AddObservation((int)nearestBox.Owner);
             }
             else
@@ -80,10 +80,10 @@ public class MoveToTargetAgent : Agent
 
 
         Vector3 toHome = homeZone.transform.localPosition - transform.localPosition;
+        Vector3 toEnemy = enemyZone.transform.localPosition - transform.localPosition;
 
         sensor.AddObservation(toHome);
-        sensor.AddObservation(homeZone.transform.localPosition);
-        sensor.AddObservation(enemyZone.transform.localPosition);
+        sensor.AddObservation(toEnemy);
         sensor.AddObservation(carriedBox != null ? 1f : 0f);
     }
 
@@ -91,54 +91,59 @@ public class MoveToTargetAgent : Agent
     {
         float moveX = actions.ContinuousActions[0];
         float moveZ = actions.ContinuousActions[1];
-        float grab = actions.ContinuousActions[2];
 
-        rewardTimer += Time.deltaTime;
+        //float grab = actions.ContinuousActions[2];
 
-        if (rewardTimer > 1f)
+        //rewardTimer += Time.deltaTime;
+
+        /*if (rewardTimer > 1f)
         {
             rewardTimer = 0f;
             AddReward(GetOwnedBoxCount() * 0.05f);
         }
+        */
+        Vector3 movement = new Vector3(moveX, 0f, moveZ).normalized;
 
-        transform.position += new Vector3(moveX, 0f, moveZ) * moveSpeed * Time.deltaTime;
+        transform.position += movement * moveSpeed * Time.deltaTime;
 
         AddReward(-0.0005f);
 
-        AddReward(GetOwnedBoxCount() * 0.001f);
+        //AddReward(GetOwnedBoxCount() * 0.001f);
 
         if (carriedBox == null)
         {
-            TryPickup(grab);
+            TryPickup();
         }
 
         if (carriedBox != null)
         {
-            carriedBox.transform.position = transform.position + new Vector3(0f, 0.5f, 1f);
+            carriedBox.transform.position = transform.position + new Vector3(0f, 0.8f, 0f);
         }
     }
 
-    private void TryPickup(float grabValue)
+    private void TryPickup()
     {
-        if (grabValue < 0.5f)
-            return;
+        //if (grabValue < 0.5f) return;
+
+        if (carriedBox != null) return;
 
         Box nearestBox = GetNearestBox();
 
-        if (nearestBox == null)
-            return;
+        if (nearestBox == null) return;
 
-        if (nearestBox.IsCarried)
-            return;
+        if (nearestBox.IsCarried) return;
 
         float distance = Vector3.Distance(transform.position, nearestBox.transform.position);
 
-        if (distance < 1f)
+        if (distance < 1.25f)
         {
             carriedBox = nearestBox;
             carriedBox.IsCarried = true;
 
-            AddReward(0.2f);
+            successfulPickups++;
+
+            if (nearestBox.Owner != team)
+                AddReward(0.1f);
 
             Debug.Log("Carried");
         }
@@ -166,6 +171,10 @@ public class MoveToTargetAgent : Agent
         {
             AddReward(3f);
         }
+        else
+        {
+            //nothing
+        }
 
         carriedBox.IsCarried = false;
 
@@ -181,24 +190,6 @@ public class MoveToTargetAgent : Agent
         Debug.Log("Delivered");
     }
 
-    /*public void BoxDelivered()
-    {
-        if (carriedBox == null)
-            return;
-
-        TeamColour previousOwner = carriedBox.Owner;
-
-        carriedBox.SetOwner(team);
-
-        if (previousOwner != team)
-        {
-            AddReward(1f);
-        }
-
-        carriedBox.IsCarried = false;
-        carriedBox = null;
-    }*/
-
     private Box GetNearestBox()
     {
         Box[] boxes = FindObjectsByType<Box>(FindObjectsSortMode.None);
@@ -209,6 +200,8 @@ public class MoveToTargetAgent : Agent
         {
             if (box.IsCarried)
                 continue;
+
+            if (box.Owner == team) continue;
 
             float distance = Vector3.Distance(transform.position, box.transform.position);
 
@@ -239,14 +232,12 @@ public class MoveToTargetAgent : Agent
         return ownedBoxes;
     }
 
-    public override void Heuristic(
-        in ActionBuffers actionsOut)
+    public override void Heuristic(in ActionBuffers actionsOut)
     {
         var actions = actionsOut.ContinuousActions;
 
         actions[0] = 0;
         actions[1] = 0;
-        actions[2] = 0;
 
         var kb = Keyboard.current;
 
@@ -264,9 +255,6 @@ public class MoveToTargetAgent : Agent
 
         if (kb.wKey.isPressed)
             actions[1] = 1;
-
-        if (kb.spaceKey.isPressed)
-            actions[2] = 1;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -289,3 +277,5 @@ public class MoveToTargetAgent : Agent
         }
     }
 }
+
+//mlagents-learn config/MoveToTarget.yaml --run-id=Home_02 --force
