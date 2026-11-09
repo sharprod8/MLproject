@@ -112,7 +112,7 @@
                 "m_Node": {
                     "m_Id": "7db1e1d8db834b0ead24a15d9713552b"
                 },
-                "m_SlotId": 2
+                "m_SlotId": 3
             },
             "m_InputSlot": {
                 "m_Node": {
@@ -188,10 +188,10 @@
         },
         "m_Blocks": [
             {
-                "m_Id": "7caafd0e13434533b60c49b3e773f3a5"
+                "m_Id": "1fb66c97bb0b41aeba6f52b2893dd0ff"
             },
             {
-                "m_Id": "1fb66c97bb0b41aeba6f52b2893dd0ff"
+                "m_Id": "7caafd0e13434533b60c49b3e773f3a5"
             }
         ]
     },
@@ -409,10 +409,10 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": 0.0,
-            "y": 0.0,
-            "width": 0.0,
-            "height": 0.0
+            "x": 235.0,
+            "y": 282.0,
+            "width": 200.0,
+            "height": 41.0
         }
     },
     "m_Slots": [
@@ -445,7 +445,7 @@
     "m_CustomBinding": "",
     "m_Value": {
         "x": 0.0,
-        "y": 1.0
+        "y": 0.5199999809265137
     },
     "m_DefaultValue": {
         "x": 0.0,
@@ -926,10 +926,10 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": 0.0,
-            "y": 0.0,
-            "width": 0.0,
-            "height": 0.0
+            "x": 13.0,
+            "y": 234.0,
+            "width": 200.0,
+            "height": 41.0
         }
     },
     "m_Slots": [
@@ -1007,7 +1007,7 @@
     "m_SurfaceType": 1,
     "m_ZTestMode": 4,
     "m_ZWriteControl": 0,
-    "m_AlphaMode": 0,
+    "m_AlphaMode": 2,
     "m_RenderFace": 2,
     "m_AlphaClip": false,
     "m_CastShadows": true,
@@ -1118,8 +1118,8 @@
     "m_StageCapability": 3,
     "m_CustomBinding": "",
     "m_Value": {
-        "x": -1.0,
-        "y": 1.0
+        "x": -1.5499999523162842,
+        "y": 1.399999976158142
     },
     "m_DefaultValue": {
         "x": -1.0,

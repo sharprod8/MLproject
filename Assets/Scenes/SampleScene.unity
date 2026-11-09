@@ -1212,7 +1212,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 848390390ab9d3740bfc096a1bdda56b, type: 2}
+  - {fileID: 2100000, guid: 720ea100b5a5ea741a0e79cfb3ab65c6, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1442,13 +1442,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 54.36, z: 0}
+  m_LocalRotation: {x: 0.38268426, y: 0.000001437962, z: -0.0000004917383, w: 0.92387927}
+  m_LocalPosition: {x: -0.05, y: 10.627348, z: -14.63}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 45, y: 0, z: 0}
 --- !u!114 &330585547
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2193,7 +2193,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -876546973899608171, guid: 788e7475c10b11b4cbec09437564fbab, type: 3}
+  - {fileID: -876546973899608171, guid: 7c1f17893faf2964cb5539d64f88e29d, type: 3}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2957,7 +2957,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 21ca8723c11d2d34abf1e9e595b0942a, type: 2}
+  - {fileID: 2100000, guid: 720ea100b5a5ea741a0e79cfb3ab65c6, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -3669,7 +3669,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 21ca8723c11d2d34abf1e9e595b0942a, type: 2}
+  - {fileID: 2100000, guid: 720ea100b5a5ea741a0e79cfb3ab65c6, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -4678,7 +4678,7 @@ MonoBehaviour:
   homeZone: {fileID: 1892232043}
   enemyZone: {fileID: 433180510}
   agentRenderer: {fileID: 1272808073}
-  moveSpeed: 12
+  moveSpeed: 1
   boxSpawner: {fileID: 721297163}
 --- !u!114 &1272808070
 MonoBehaviour:
@@ -6369,7 +6369,7 @@ MonoBehaviour:
   homeZone: {fileID: 433180510}
   enemyZone: {fileID: 1892232043}
   agentRenderer: {fileID: 1708762797}
-  moveSpeed: 12
+  moveSpeed: 1
   boxSpawner: {fileID: 721297163}
 --- !u!114 &1708762801
 MonoBehaviour:
@@ -6861,7 +6861,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 21ca8723c11d2d34abf1e9e595b0942a, type: 2}
+  - {fileID: 2100000, guid: 720ea100b5a5ea741a0e79cfb3ab65c6, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -7439,7 +7439,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 21ca8723c11d2d34abf1e9e595b0942a, type: 2}
+  - {fileID: 2100000, guid: 720ea100b5a5ea741a0e79cfb3ab65c6, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -7832,7 +7832,7 @@ MonoBehaviour:
   homeZone: {fileID: 433180510}
   enemyZone: {fileID: 1892232043}
   agentRenderer: {fileID: 1928755962}
-  moveSpeed: 12
+  moveSpeed: 1
   boxSpawner: {fileID: 721297163}
 --- !u!114 &1928755959
 MonoBehaviour:
@@ -7858,7 +7858,7 @@ MonoBehaviour:
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
-  m_BehaviorType: 0
+  m_BehaviorType: 1
   m_BehaviorName: MoveToTarget
   TeamId: 0
   m_UseChildSensors: 1
@@ -8637,7 +8637,7 @@ MonoBehaviour:
   homeZone: {fileID: 1892232043}
   enemyZone: {fileID: 433180510}
   agentRenderer: {fileID: 2077500580}
-  moveSpeed: 12
+  moveSpeed: 1
   boxSpawner: {fileID: 721297163}
 --- !u!114 &2077500577
 MonoBehaviour:
