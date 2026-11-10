@@ -179,6 +179,22 @@ Physics.SyncTransforms()
         }
     }
 
+    private void HandleWallContact()
+    {
+        if (wallTriggeredThisEpisode)
+            return;
+
+        wallTriggeredThisEpisode = true;
+
+        AddReward(-0.5f);
+
+        
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.EndMatch("WALL COLLISION");
+        }
+    }
+
     private void TryPickup()
     {
         //if (grabValue < 0.5f) return;
