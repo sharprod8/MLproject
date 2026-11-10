@@ -1,20 +1,61 @@
+
 using UnityEngine;
+using System.Collections.Generic;
 
 public class BoxSpawner : MonoBehaviour
 {
-    [SerializeField] private Box[] boxes;
+    [Header("BOXES")]
+    [SerializeField] private Box[] spawnedBoxes;
 
+    // NEW: Store each box's original position.
+    private Dictionary<Box, Vector3> originalPositions =
+        new Dictionary<Box, Vector3>();
+
+    // NEW: Store each box's original rotation.
+    private Dictionary<Box, Quaternion> originalRotations =
+        new Dictionary<Box, Quaternion>();
+
+    private void Awake()
+    {
+
+        if (spawnedBoxes == null || spawnedBoxes.Length == 0)
+        {
+            spawnedBoxes = FindObjectsByType<Box>(
+                FindObjectsSortMode.None
+            );
+        }
+
+       
+        foreach (Box box in spawnedBoxes)
+        {
+            if (box == null)
+                continue;
+
+            originalPositions[box] = box.transform.position;
+            originalRotations[box] = box.transform.rotation;
+        }
+    }
+
+    
     public void ResetBoxes()
     {
-        foreach (Box box in boxes)
+        foreach (Box box in spawnedBoxes)
         {
-            box.IsCarried = false;
+            if (box == null)
+                continue;
 
-            box.SetOwner(TeamColour.None);
+            if (!originalPositions.ContainsKey(box))
+                continue;
 
-            Vector3 randomOffset = new Vector3(Random.Range(-7f, 7f), 0.5f, Random.Range(-7f, 7f));
-
-            box.transform.position = transform.position + randomOffset;
+            
+            box.ResetBox(
+                originalPositions[box],
+                originalRotations[box]
+            );
         }
+
+        Physics.SyncTransforms();
+
+        Debug.Log("resetted");
     }
 }
