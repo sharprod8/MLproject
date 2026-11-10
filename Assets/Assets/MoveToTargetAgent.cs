@@ -144,29 +144,17 @@ Physics.SyncTransforms()
         float moveX = actions.ContinuousActions[0];
         float moveZ = actions.ContinuousActions[1];
 
-        //float grab = actions.ContinuousActions[2];
-
-        //rewardTimer += Time.deltaTime;
-
-        /*if (rewardTimer > 1f)
-        {
-            rewardTimer = 0f;
-            AddReward(GetOwnedBoxCount() * 0.05f);
-        }
-        */
-        Vector3 movement = new Vector3(moveX, 0f, moveZ).normalized;
-
-        transform.position += movement * moveSpeed * Time.deltaTime;
+       
+        
+        movementInput =
+            new Vector3(moveX, 0f, moveZ).normalized;
 
         AddReward(-0.0005f);
 
-        //AddReward(GetOwnedBoxCount() * 0.001f);
-
         if (carriedBox == null)
+        {
             TryPickup();
-
-        if (carriedBox != null)
-            carriedBox.transform.position = transform.position + new Vector3(0f, 0.8f, 0f);
+        }
     }
 
     private void TryPickup()
