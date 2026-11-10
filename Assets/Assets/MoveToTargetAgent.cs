@@ -49,14 +49,54 @@ public class MoveToTargetAgent : Agent
 
     public override void Initialize()
     {
-        //e
+        rb = GetComponent<Rigidbody>();
+
+rb.interpolation = RigidbodyInterpolation.Interpolate;
+
+        if (team == TeamColour.Red)
+        {
+            agentRenderer.material.color = Color.red;
+        }
+        else if (team == TeamColour.Blue)
+        {
+            agentRenderer.material.color = Color.blue;
+        }
+
+if (GameManager.Instance != null)
+        {
+            GameManager.Instance.RegisterAgent(this);
+        }
     }
 
     public override void OnEpisodeBegin()
     {
-        carriedBox = null;
+if (carriedBox != null)
+        {
+            carriedBox.IsCarried = false;
+            carriedBox = null;
+        }
 
-        transform.position = homeZone.transform.position + new Vector3(Random.Range(-1f, 1f), 0.5f, Random.Range(-1f, 1f));
+        movementInput = Vector3.zero;
+
+wallTriggeredThisEpisode = false;
+
+transform.position =
+            homeZone.transform.position +
+            new Vector3(
+                Random.Range(-1f, 1f),
+                0.5f,
+                Random.Range(-1f, 1f)
+            );
+
+if (rb != null)
+        {
+            rb.position = transform.position;
+
+            rb.velocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+
+Physics.SyncTransforms()
 
         //if (boxResetter == true)
             //boxSpawner.ResetBoxes();
