@@ -4,11 +4,13 @@ using Unity.MLAgents.Sensors;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(Rigidbody))]
 public class MoveToTargetAgent : Agent
 {
+
     [Header("Team")]
     [SerializeField] public TeamColour team;
-    [SerializeField] private bool boxResetter;
+    //erializeField] private bool boxResetter;
 
     [Header("Zones")]
     [SerializeField] private ZoneScript homeZone;
@@ -19,12 +21,16 @@ public class MoveToTargetAgent : Agent
 
     [Header("speed")]
     [SerializeField] private float moveSpeed = 4f;
+    private Rigidbody rb;
+    private Vector3 movementInput;
 
-    [SerializeField] private BoxSpawner boxSpawner;
+    //[SerializeField] private BoxSpawner boxSpawner;
     private Box carriedBox;
     private int successfulPickups;
     private int successfulDeliveries;
     private float rewardTimer;
+
+    bool hitWallInEpisode;
     
 
     private void Start()
@@ -41,16 +47,22 @@ public class MoveToTargetAgent : Agent
         }
     }
 
+    public override void Initialize()
+    {
+        //e
+    }
+
     public override void OnEpisodeBegin()
     {
         carriedBox = null;
 
         transform.position = homeZone.transform.position + new Vector3(Random.Range(-1f, 1f), 0.5f, Random.Range(-1f, 1f));
 
-        if (boxResetter == true)
-        {
-            boxSpawner.ResetBoxes();
-        }
+        //if (boxResetter == true)
+            //boxSpawner.ResetBoxes();
+
+        successfulDeliveries = 0;
+        successfulPickups = 0;
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -111,14 +123,10 @@ public class MoveToTargetAgent : Agent
         //AddReward(GetOwnedBoxCount() * 0.001f);
 
         if (carriedBox == null)
-        {
             TryPickup();
-        }
 
         if (carriedBox != null)
-        {
             carriedBox.transform.position = transform.position + new Vector3(0f, 0.8f, 0f);
-        }
     }
 
     private void TryPickup()
@@ -187,7 +195,7 @@ public class MoveToTargetAgent : Agent
 
         carriedBox = null;
 
-        Debug.Log("Delivered");
+        Debug.Log("Delivered " + team);
     }
 
     private Box GetNearestBox()
@@ -261,8 +269,12 @@ public class MoveToTargetAgent : Agent
     {
         if (other.CompareTag("Wall"))
         {
-            AddReward(-0.5f);
-            EndEpisode();
+            AddReward(-1f);
+
+            if (GameManager.instance != null)
+            {
+                GameManager.instance.EndMatch("WALL");
+            }
         }
     }
 
@@ -274,6 +286,14 @@ public class MoveToTargetAgent : Agent
         {
             Gizmos.color = Color.yellow;
             Gizmos.DrawLine(transform.position, nearest.transform.position);
+        }
+    }
+
+    void OnDestroy()
+    {
+        if (GameManager.instance != null)
+        {
+            GameManager.instance.UnregisterAgent(this);
         }
     }
 }

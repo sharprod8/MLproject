@@ -4,19 +4,21 @@ using UnityEngine.UI;
 using TMPro;
 using Unity.MLAgents;
 using System.Collections.Generic;
+using NUnit.Framework.Interfaces;
+using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
-    public static GameManager Instance { get; private set; }
+    public static GameManager instance { get; private set; }
 
     [Header("match")]
     [SerializeField] private float matchDuration = 120f;
     [SerializeField] private float scoreUpdateInterval = 0.2f;
 
-    [Header("boxes)]
+    [Header("boxes")]
     [SerializeField] private BoxSpawner boxSpawner;
 
-    [Header("UI)]
+    [Header("UI")]
     [SerializeField] private TMP_Text timerText;
     [SerializeField] private TMP_Text redScoreText;
     [SerializeField] private TMP_Text blueScoreText;
@@ -38,7 +40,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TMP_Text blueAverageRewardText;
     [SerializeField] private TMP_Text lastResultText;
 
-    private SimpleMultiAgentGroup agentGroup;
+    private SimpleMultiAgentGroup blueGroup;
+    private SimpleMultiAgentGroup redGroup;
 
     private readonly List<MoveToTargetAgent> agents = new();
 
@@ -52,18 +55,22 @@ public class GameManager : MonoBehaviour
     private int draws;
     private float totalRedReward;
     private float totalBlueReward;
+    private float matchTimerRealTime;
+
+    private float oldTimescale = 1f;
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
+        if (instance != null && instance != this)
         {
             Destroy(gameObject);
             return;
         }
 
-        Instance = this;
+        instance = this;
 
-        agentGroup = new SimpleMultiAgentGroup();
+        redGroup = new SimpleMultiAgentGroup();
+        blueGroup = new SimpleMultiAgentGroup();
     }
 
     private void Start()
@@ -78,7 +85,11 @@ public class GameManager : MonoBehaviour
             return;
 
         agents.Add(agent);
-        agentGroup.RegisterAgent(agent);
+        
+        if (agent.team == TeamColour.Red)
+            redGroup.RegisterAgent(agent);
+        else if (agent.team == TeamColour.Blue)
+            blueGroup.RegisterAgent(agent);
     }
 
     public void UnregisterAgent(MoveToTargetAgent agent)
@@ -86,8 +97,26 @@ public class GameManager : MonoBehaviour
         if (!agents.Contains(agent))
             return;
 
-        agentGroup.UnregisterAgent(agent);
+        if (agent.team == TeamColour.Red)
+            redGroup.UnregisterAgent(agent);
+        else if (agent.team == TeamColour.Blue)
+            blueGroup.UnregisterAgent(agent);
         agents.Remove(agent);
+    }
+
+    void NewGame()
+    {
+        timer = matchDuration;
+
+        matchTimerRealTime = Time.realtimeSinceStartup + matchDuration;
+
+        scoreUpdateTimer = 0f;
+        matchOver = false;
+
+        if (resultText != null)
+            resultText.text = "";
+
+        UpdateUI();
     }
 
     private void Update()
@@ -95,9 +124,9 @@ public class GameManager : MonoBehaviour
         if (matchOver)
             return;
 
-        timer -= Time.deltaTime;
+        timer = Mathf.Max(0f, matchTimerRealTime - Time.realtimeSinceStartup);
 
-        scoreUpdateTimer += Time.deltaTime;
+        scoreUpdateTimer += Time.unscaledDeltaTime;
 
         if (scoreUpdateTimer >= scoreUpdateInterval)
         {
@@ -107,8 +136,7 @@ public class GameManager : MonoBehaviour
 
         if (timer <= 0f)
         {
-            timer = 0f;
-            EndMatch();
+            EndMatch("TIME OUT");
         }
     }
 
@@ -178,7 +206,14 @@ public class GameManager : MonoBehaviour
 
         if (timerFill != null)
         {
-            timerFill.fillAmount = timer / matchDuration;
+            if (matchDuration > 0f)
+            {
+                timerFill.fillAmount = (float)(timer / matchDuration);
+            }
+            else
+            {
+                timerFill.fillAmount = (float)0f;
+            }
         }
 
         int redScore = GetTeamScore(TeamColour.Red);
@@ -205,18 +240,16 @@ public class GameManager : MonoBehaviour
         if (completedMatchesText != null)
             completedMatchesText.text = completedMatches.ToString();
 
-        // Current leader
         if (leaderText != null)
         {
             if (redScore > blueScore)
-                leaderText.text = "RED TEAM LEADING";
+                leaderText.text = "RED TEAM WINNING";
             else if (blueScore > redScore)
-                leaderText.text = "BLUE TEAM LEADING";
+                leaderText.text = "BLUE TEAM WINNING";
             else
                 leaderText.text = "DRAW";
         }
 
-        // Win percentages
         if (completedMatches > 0)
         {
             float redRate =
@@ -240,7 +273,6 @@ public class GameManager : MonoBehaviour
                 blueWinRateText.text = "0%";
         }
 
-        // Average final episode rewards
         if (completedMatches > 0)
         {
             if (redAverageRewardText != null)
@@ -253,7 +285,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void EndMatch()
+    public void EndMatch(string reason)
     {
         if (matchOver)
             return;
@@ -297,18 +329,43 @@ public class GameManager : MonoBehaviour
         }
 
         Debug.Log(
-            $"Episode {episodeNumber} ended. " +
-            $"Red: {redScore}, blue: {blueScore}. " +
+            $"Episode {episodeNumber} end " +
+            $"Red: {redScore}, blue: {blueScore} " +
             $"winner: {result}"
         );
 
         UpdateUI();
+        if (boxSpawner != null)
+            boxSpawner.ResetBoxes();
 
-        boxSpawner.ResetBoxes();
-        agentGroup.EndGroupEpisode();
+        redGroup.EndGroupEpisode();
+        blueGroup.EndGroupEpisode();
 
         episodeNumber++;
 
+        StartCoroutine(StartTheNextMatch());
+    }
+
+    private IEnumerator StartTheNextMatch()
+    {
+        oldTimescale = Time.timeScale;
+        Time.timeScale = 0f;
+
+        yield return new WaitForSecondsRealtime(1f);
+
+        episodeNumber++;
+
+        Time.timeScale = oldTimescale;
+
         StartNewMatch();
+    }
+
+    private void OnDestroy()
+    {
+        if (instance == this)
+        {
+            Time.timeScale = oldTimescale;
+            instance = null;
+        }
     }
 }
