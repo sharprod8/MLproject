@@ -332,14 +332,19 @@ Physics.SyncTransforms()
     {
         if (other.CompareTag("Wall"))
         {
-            AddReward(-1f);
-
-            if (GameManager.instance != null)
-            {
-                GameManager.instance.EndMatch("WALL");
-            }
+            HandleWallContact();
         }
     }
+
+    
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.collider.CompareTag("Wall"))
+        {
+            HandleWallContact();
+        }
+    }
+
 
     private void OnDrawGizmos()
     {
