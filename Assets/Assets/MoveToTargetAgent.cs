@@ -47,6 +47,28 @@ public class MoveToTargetAgent : Agent
         }
     }
 
+private void FixedUpdate()
+    {
+        if (rb == null)
+            return;
+
+        Vector3 movement =
+            movementInput * moveSpeed * Time.fixedDeltaTime;
+
+        rb.MovePosition(rb.position + movement);
+    }
+
+    private void LateUpdate()
+    {
+        if (carriedBox != null)
+        {
+            carriedBox.transform.position =
+                transform.position +
+                new Vector3(0f, 0.8f, 0f);
+        }
+    }
+
+
     public override void Initialize()
     {
         rb = GetComponent<Rigidbody>();
@@ -190,12 +212,10 @@ Physics.SyncTransforms()
         if (carriedBox == null)
             return;
 
-        //eweqew
         if (zone.Team != team)
             return;
 
-        TeamColour previousOwner =
-            carriedBox.Owner;
+        TeamColour previousOwner = carriedBox.Owner;
 
         carriedBox.SetOwner(team);
 
@@ -207,10 +227,6 @@ Physics.SyncTransforms()
         {
             AddReward(3f);
         }
-        else
-        {
-            //nothing
-        }
 
         carriedBox.IsCarried = false;
 
@@ -219,11 +235,14 @@ Physics.SyncTransforms()
             new Vector3(
                 Random.Range(-0.3f, 0.3f),
                 0.5f,
-                Random.Range(-0.3f, 0.3f));
+                Random.Range(-0.3f, 0.3f)
+            );
 
         carriedBox = null;
 
-        Debug.Log("Delivered " + team);
+        successfulDeliveries++;
+
+        Debug.Log(team + " delivered a box");
     }
 
     private Box GetNearestBox()
